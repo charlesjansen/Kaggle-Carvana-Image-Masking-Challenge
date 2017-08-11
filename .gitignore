@@ -1,0 +1,9 @@
+*.h5
+*.hdf5
+*.gz
+*.csv
+.ipnb_checkpoints
+_pycache_
+weights
+submit
+logs
