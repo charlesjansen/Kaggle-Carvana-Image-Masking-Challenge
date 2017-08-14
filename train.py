@@ -126,7 +126,7 @@ callbacks = [EarlyStopping(monitor='val_dice_loss',
                                epsilon=1e-6,#-4
                                mode='max'),
              ModelCheckpoint(monitor='val_dice_loss',
-                             filepath='weights/best_weights_1024_morePatience_batch4_renorm.hdf5',
+                             filepath='weights/best_weights_1024_morePatience_batch4_renorm_adam.hdf5',
                              save_best_only=True,
                              save_weights_only=True,
                              mode='max',

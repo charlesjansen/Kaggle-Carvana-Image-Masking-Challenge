@@ -3,21 +3,21 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from model.u_net import get_unet_128, get_unet_256, get_unet_512, get_unet_1024
+from model.u_net import get_unet_128, get_unet_256, get_unet_512, get_unet_1024, get_unet_renorm_1024
 
-df_test = pd.read_csv('input/sample_submission.csv')
+df_test = pd.read_csv('../input/sample_submission.csv')
 ids_test = df_test['img'].map(lambda s: s.split('.')[0])
 
-input_size = 128
-batch_size = 16
+input_size = 1024
+batch_size = 4
 
 orig_width = 1918
 orig_height = 1280
 
-threshold = 0.5
+threshold = 0.55
 
-model = get_unet_128()
-model.load_weights(filepath='weights/best_weights.hdf5')
+model = get_unet_renorm_1024()
+model.load_weights(filepath='weights/best_weights_1024_morePatience_batch4_renorm.hdf5')
 
 names = []
 for id in ids_test:
@@ -45,7 +45,7 @@ for start in tqdm(range(0, len(ids_test), batch_size)):
     end = min(start + batch_size, len(ids_test))
     ids_test_batch = ids_test[start:end]
     for id in ids_test_batch.values:
-        img = cv2.imread('input/test/{}.jpg'.format(id))
+        img = cv2.imread('../input/test/{}.jpg'.format(id))
         img = cv2.resize(img, (input_size, input_size))
         x_batch.append(img)
     x_batch = np.array(x_batch, np.float32) / 255
@@ -59,4 +59,4 @@ for start in tqdm(range(0, len(ids_test), batch_size)):
 
 print("Generating submission file...")
 df = pd.DataFrame({'img': names, 'rle_mask': rles})
-df.to_csv('submit/submission.csv.gz', index=False, compression='gzip')
+df.to_csv('submit/submission_best_weights_1024_morePatience_batch4_renorm_thres055.csv.gz', index=False, compression='gzip')

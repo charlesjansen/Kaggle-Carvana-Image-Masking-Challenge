@@ -1,6 +1,6 @@
 from keras.models import Model
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Activation, UpSampling2D, BatchNormalization
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.losses import binary_crossentropy
 import keras.backend as K
 from batch_renorm import BatchRenormalization
@@ -762,6 +762,6 @@ def get_unet_renorm_1024(input_shape=(1024, 1024, 3),
 
     model = Model(inputs=inputs, outputs=classify)
 
-    model.compile(optimizer=SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
+    model.compile(optimizer = SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
 
     return model
