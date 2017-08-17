@@ -2,22 +2,22 @@ import cv2
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import os
 
-from model.u_net import get_unet_128, get_unet_256, get_unet_512, get_unet_1024, get_unet_renorm_1024
+import params
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
+input_size = params.input_size
+batch_size = params.batch_size
+orig_width = params.orig_width
+orig_height = params.orig_height
+threshold = params.threshold
+model = params.model
 
 df_test = pd.read_csv('../input/sample_submission.csv')
 ids_test = df_test['img'].map(lambda s: s.split('.')[0])
 
-input_size = 1024
-batch_size = 4
-
-orig_width = 1918
-orig_height = 1280
-
-threshold = 0.55
-
-model = get_unet_renorm_1024()
-model.load_weights(filepath='weights/best_weights_1024_morePatience_batch4_renorm.hdf5')
+model.load_weights(filepath='weights/get_unet_renorm_1024_valid10.hdf5')
 
 names = []
 for id in ids_test:
@@ -59,4 +59,4 @@ for start in tqdm(range(0, len(ids_test), batch_size)):
 
 print("Generating submission file...")
 df = pd.DataFrame({'img': names, 'rle_mask': rles})
-df.to_csv('submit/submission_best_weights_1024_morePatience_batch4_renorm_thres055.csv.gz', index=False, compression='gzip')
+df.to_csv('submit/get_unet_renorm_1024_valid10.hdf5.csv.gz', index=False, compression='gzip')

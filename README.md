@@ -12,9 +12,14 @@ This solution was based on [Heng CherKeng's code for PyTorch](https://www.kaggle
 
 ## Updates
 
+### Update 15.8.2017
+* Added Hue/Saturation/Value augmentation.
+* Switched to RMSprop optimizer as default.
+* Added multithreaded inference with inference and data loading done on separate threads. This reduced inference time by 40% in my tests. You can run `test_submit_multithreaded.py` to try it.
+
 ### Update 10.8.2017
 * Added 1024x1024 U-net
-* Not using *predict_generator* anymore due to memory constraints with large input.
+* Not using *predict_generator* anymore due to memory constraints with large input
 
 ### Update 9.8.2017
 * Using *Binary Crossentropy Dice Loss* in place of *Binary Crossentropy*

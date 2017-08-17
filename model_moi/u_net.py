@@ -1,22 +1,11 @@
 from keras.models import Model
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Activation, UpSampling2D, BatchNormalization
-from keras.optimizers import SGD, Adam
+from keras.optimizers import SGD, Adam, RMSprop
 from keras.losses import binary_crossentropy
 import keras.backend as K
 from batch_renorm import BatchRenormalization
+from model_moi.losses import bce_dice_loss, dice_loss
 
-
-
-def dice_loss(y_true, y_pred):
-    smooth = 1.
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-
-
-def bce_dice_loss(y_true, y_pred):
-    return binary_crossentropy(y_true, y_pred) + (1 - dice_loss(y_true, y_pred))
 
 
 def get_unet_128(input_shape=(128, 128, 3),
@@ -124,7 +113,7 @@ def get_unet_128(input_shape=(128, 128, 3),
 
     model = Model(inputs=inputs, outputs=classify)
 
-    model.compile(optimizer=SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
+    model.compile(optimizer=RMSprop(lr=0.0001), loss=bce_dice_loss, metrics=[dice_loss])
 
     return model
 
@@ -256,7 +245,7 @@ def get_unet_256(input_shape=(256, 256, 3),
 
     model = Model(inputs=inputs, outputs=classify)
 
-    model.compile(optimizer=SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
+    model.compile(optimizer=RMSprop(lr=0.0001), loss=bce_dice_loss, metrics=[dice_loss])
 
     return model
 
@@ -410,7 +399,7 @@ def get_unet_512(input_shape=(512, 512, 3),
 
     model = Model(inputs=inputs, outputs=classify)
 
-    model.compile(optimizer=SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
+    model.compile(optimizer=RMSprop(lr=0.0001), loss=bce_dice_loss, metrics=[dice_loss])
 
     return model
 
@@ -586,7 +575,7 @@ def get_unet_1024(input_shape=(1024, 1024, 3),
 
     model = Model(inputs=inputs, outputs=classify)
 
-    model.compile(optimizer=SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
+    model.compile(optimizer=RMSprop(lr=0.0001), loss=bce_dice_loss, metrics=[dice_loss])
 
     return model
 
@@ -762,6 +751,6 @@ def get_unet_renorm_1024(input_shape=(1024, 1024, 3),
 
     model = Model(inputs=inputs, outputs=classify)
 
-    model.compile(optimizer = SGD(lr=0.01, momentum=0.9), loss=bce_dice_loss, metrics=[dice_loss])
+    model.compile(optimizer=RMSprop(lr=0.0001), loss=bce_dice_loss, metrics=[dice_loss])
 
     return model
