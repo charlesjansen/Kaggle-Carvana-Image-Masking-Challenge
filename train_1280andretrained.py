@@ -135,21 +135,21 @@ def valid_generator():
             y_batch = np.array(y_batch, np.float32) / 255
             yield x_batch, y_batch
 
-model.load_weights(filepath='weights/unet_renorm_1280_valid20_retrained.hdf5')
+model.load_weights(filepath='weights/unet_renorm_1280_valid20.hdf5')
 
 callbacks = [EarlyStopping(monitor='val_dice_loss',
-                           patience=6,
+                           patience=8,
                            verbose=1,
                            min_delta=1e-4,
                            mode='max'),
              ReduceLROnPlateau(monitor='val_dice_loss',
-                               factor=0.1,
+                               factor=0.8,
                                patience=2,
                                verbose=1,
                                epsilon=1e-4,
                                mode='max'),
              ModelCheckpoint(monitor='val_dice_loss',
-                             filepath='weights/unet_renorm_1280_valid20_retrained2.hdf5',#pretained with 1e-5,0.2, 12,6, 1.5days ;post trained 1e-4,0.8,8,2 
+                             filepath='weights/unet_renorm_1280_valid20_retrained.hdf5',#pretained with 1e-5,0.2, 12,6, 1.5days ;post trained 1e-4,0.8,8,2 
                              save_best_only=True,
                              save_weights_only=True,
                              verbose = 1,

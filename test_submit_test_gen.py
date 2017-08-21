@@ -3,21 +3,24 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from model.u_net import get_unet_128, get_unet_256, get_unet_512, get_unet_1024, get_unet_renorm_1024
+import params
+
+nameWeight = "unet_renorm_1280_valid20"
+nameOutput = nameWeight + "_testGen"
+
+input_width = params.input_width
+input_height = params.input_height
+#input_size = params.input_size
+batch_size = params.batch_size
+orig_width = params.orig_width
+orig_height = params.orig_height
+threshold = params.threshold
+model = params.model
 
 df_test = pd.read_csv('../input/sample_submission.csv')
 ids_test = df_test['img'].map(lambda s: s.split('.')[0])
 
-input_size = 1024
-batch_size = 4
-
-orig_width = 1918
-orig_height = 1280
-
-threshold = 0.5
-
-model = get_unet_renorm_1024()
-model.load_weights(filepath='weights/best_weights_1024_morePatience_batch4_renorm.hdf5')
+model.load_weights(filepath='weights/' + nameWeight + '.hdf5')
 
 names = []
 for id in ids_test:
@@ -40,7 +43,7 @@ def run_length_encode(mask):
 rles = []
 
 #100064 ids_test = 32*53*59
-test_splits = 59  # Split test set (number of splits must be multiple of 2-->non! voir au dessus) 16 for 512; 8 initialy
+test_splits = 106  # Split test set (number of splits must be multiple of 2-->non! voir au dessus) 16 for 512; 8 initialy
 ids_test_splits = np.split(ids_test, indices_or_sections=test_splits)
 
 
@@ -57,7 +60,7 @@ for ids_test_split in ids_test_splits:
                 ids_test_split_batch = ids_test_split[start:end]
                 for id in ids_test_split_batch.values:
                     img = cv2.imread('../input/test/{}.jpg'.format(id))
-                    img = cv2.resize(img, (input_size, input_size))
+                    img = cv2.resize(img, (input_width, input_height))
                     x_batch.append(img)
                 x_batch = np.array(x_batch, np.float32) / 255
                 yield x_batch
@@ -78,4 +81,4 @@ for ids_test_split in ids_test_splits:
 
 print("Generating submission file...")
 df = pd.DataFrame({'img': names, 'rle_mask': rles})
-df.to_csv('submit/submission_best_weights_1024_morePatience_batch4_renorm_testgen.csv.gz', index=False, compression='gzip')
+df.to_csv('submit/' + nameOutput + '.csv.gz', index=False, compression='gzip')
