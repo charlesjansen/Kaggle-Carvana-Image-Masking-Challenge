@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import params
 
-nameWeight = "get_unet_renorm_1024_valid10"
+nameWeight = "u_renorm_incep_eco_1024_alt_adam_img3sum1024_val20.0_bat2_retrained3"
 nameOutput = nameWeight + "_testGen"
 
 input_width = params.input_width
@@ -47,6 +47,22 @@ test_splits = 106  # Split test set (number of splits must be multiple of 2-->no
 ids_test_splits = np.split(ids_test, indices_or_sections=test_splits)
 
 
+def randomHueSaturationValue(image, hue_shift_limit=(-180, 180),
+                             sat_shift_limit=(-255, 255),
+                             val_shift_limit=(-255, 255), u=0.5):
+    if np.random.random() < u:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        h, s, v = cv2.split(image)
+        hue_shift = np.random.uniform(hue_shift_limit[0], hue_shift_limit[1])
+        h = cv2.add(h, hue_shift)
+        sat_shift = np.random.uniform(sat_shift_limit[0], sat_shift_limit[1])
+        s = cv2.add(s, sat_shift)
+        val_shift = np.random.uniform(val_shift_limit[0], val_shift_limit[1])
+        v = cv2.add(v, val_shift)
+        image = cv2.merge((h, s, v))
+        image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+
+    return image
 
 split_count = 0
 for ids_test_split in ids_test_splits:
@@ -61,6 +77,23 @@ for ids_test_split in ids_test_splits:
                 for id in ids_test_split_batch.values:
                     img = cv2.imread('../input/test/{}.jpg'.format(id))
                     img = cv2.resize(img, (input_width, input_height))
+                    img = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                    img2 = randomHueSaturationValue(img,
+                                                   hue_shift_limit=(-50, 50),
+                                                   sat_shift_limit=(-5, 5),
+                                                   val_shift_limit=(-15, 15))
+                    img3 = randomHueSaturationValue(img,
+                                                   hue_shift_limit=(-50, 50),
+                                                   sat_shift_limit=(-5, 5),
+                                                   val_shift_limit=(-15, 15))
+                    img4 = randomHueSaturationValue(img,
+                                                   hue_shift_limit=(-50, 50),
+                                                   sat_shift_limit=(-5, 5),
+                                                   val_shift_limit=(-15, 15))
+                    img = img+img2+img3+img4
                     x_batch.append(img)
                 x_batch = np.array(x_batch, np.float32) / 255
                 yield x_batch
@@ -73,7 +106,7 @@ for ids_test_split in ids_test_splits:
     preds = np.squeeze(preds, axis=3)
     
     print("Generating masks...")
-    for pred in tqdm(preds, miniters=1000):
+    for pred in tqdm(preds, miniters=100):
         prob = cv2.resize(pred, (orig_width, orig_height))
         mask = prob > threshold
         rle = run_length_encode(mask)

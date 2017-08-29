@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import params
 
-nameWeight = "get_unet_renorm_1024_valid10"
+nameWeight = "unet_renorm_incep_eco_1024_val20.0_bat1"
 nameOutput = nameWeight + "_testGen"
 
 input_width = params.input_width
@@ -81,4 +81,4 @@ for ids_test_split in ids_test_splits:
 
 print("Generating submission file...")
 df = pd.DataFrame({'img': names, 'rle_mask': rles})
-df.to_csv('submit/' + nameOutput + '.csv', index=False)
+df.to_csv('submit/' + nameOutput + '.csv.gz', index=False, compression='gzip')

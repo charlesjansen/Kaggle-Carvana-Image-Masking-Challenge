@@ -14,6 +14,10 @@ batch_size = params.batch_size
 model = params.model
 test_size =  params.test_size
 
+
+model.load_weights(filepath='weights/u_renorm_incep_eco_1024_alt_adam_img3sum1024_val20.0_bat2_retrained2.hdf5')
+
+
 df_train = pd.read_csv('../input/train_masks.csv')
 ids_train = df_train['img'].map(lambda s: s.split('.')[0])
 
@@ -104,6 +108,19 @@ def train_generator():
                                                hue_shift_limit=(-50, 50),
                                                sat_shift_limit=(-5, 5),
                                                val_shift_limit=(-15, 15))
+                img2 = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img3 = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img4 = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img = img+img2+img3+img4
                 img, mask = randomShiftScaleRotate(img, mask,
                                                    shift_limit=(-0.0625, 0.0625),
                                                    scale_limit=(-0.1, 0.1),
@@ -127,6 +144,23 @@ def valid_generator():
             for id in ids_valid_batch.values:
                 img = cv2.imread('../input/train/{}.jpg'.format(id))
                 img = cv2.resize(img, (input_width, input_height))
+                img = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img2 = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img3 = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img4 = randomHueSaturationValue(img,
+                                               hue_shift_limit=(-50, 50),
+                                               sat_shift_limit=(-5, 5),
+                                               val_shift_limit=(-15, 15))
+                img = img+img2+img3+img4
                 mask = cv2.imread('../input/train_masks/{}_mask.png'.format(id), cv2.IMREAD_GRAYSCALE)
                 mask = cv2.resize(mask, (input_width, input_height))
                 mask = np.expand_dims(mask, axis=2)
@@ -138,18 +172,18 @@ def valid_generator():
 
 
 callbacks = [EarlyStopping(monitor='val_dice_loss',
-                           patience=8,
+                           patience=10,
                            verbose=1,
-                           min_delta=1e-4,
+                           min_delta=1e-5,
                            mode='max'),
              ReduceLROnPlateau(monitor='val_dice_loss',
-                               factor=0.1,
+                               factor=0.3,
                                patience=4,
                                verbose=1,
-                               epsilon=1e-4,
+                               epsilon=1e-5,
                                mode='max'),
              ModelCheckpoint(monitor='val_dice_loss',
-                             filepath='weights/unet_renorm_incep_eco_1024_alternate_adam_'+str(input_width)+'_val'+str(test_size*100)+'_bat'+str(batch_size)+'.hdf5', 
+                             filepath='weights/u_renorm_incep_eco_1024_alt_adam_img3sum'+str(input_width)+'_val'+str(test_size*100)+'_bat'+str(batch_size)+'_retrained3.hdf5', 
                              save_best_only=True,
                              save_weights_only=True,
                              verbose = 1,

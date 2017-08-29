@@ -15,7 +15,7 @@ orig_height = params.orig_height
 threshold = params.threshold
 model = params.model
 
-df_test = pd.read_csv('input/sample_submission.csv')
+df_test = pd.read_csv('../input/sample_submission.csv')
 ids_test = df_test['img'].map(lambda s: s.split('.')[0])
 
 names = []
@@ -50,7 +50,7 @@ def data_loader(q, ):
         end = min(start + batch_size, len(ids_test))
         ids_test_batch = ids_test[start:end]
         for id in ids_test_batch.values:
-            img = cv2.imread('input/test/{}.jpg'.format(id))
+            img = cv2.imread('../input/test/{}.jpg'.format(id))
             img = cv2.resize(img, (input_size, input_size))
             x_batch.append(img)
         x_batch = np.array(x_batch, np.float32) / 255
