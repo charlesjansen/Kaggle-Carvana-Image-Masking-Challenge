@@ -107,6 +107,7 @@ for ids_test_split in ids_test_splits:
     
     print("Generating masks...")
     for pred in tqdm(preds, miniters=100):
+        cv2.imwrite('../input/layer1Pred/1024/{}.png'.format(id), img_as_ubyte(pred))
         prob = cv2.resize(pred, (orig_width, orig_height))
         mask = prob > threshold
         rle = run_length_encode(mask)

@@ -18,7 +18,7 @@ model = params.model
 test_size =  params.test_size
 
 
-#model.load_weights(filepath='weights/u_Norm_incep_eco_512_alternate_RMS512_val20_b4.hdf5')
+model.load_weights(filepath='weights/unet_renorm_incep_eco_alternate_adam_RMS_1280_val20_b2.hdf5')
 
 
 df_train = pd.read_csv('../input/train_masks.csv')
@@ -28,65 +28,6 @@ ids_train_split, ids_valid_split = train_test_split(ids_train, test_size=test_si
 
 print('Training on {} samples'.format(len(ids_train_split)))
 print('Validating on {} samples'.format(len(ids_valid_split)))
-
-
-def randomHueSaturationValue(image, hue_shift_limit=(-180, 180),
-                             sat_shift_limit=(-255, 255),
-                             val_shift_limit=(-255, 255), u=0.5):
-    if np.random.random() < u:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        h, s, v = cv2.split(image)
-        hue_shift = np.random.uniform(hue_shift_limit[0], hue_shift_limit[1])
-        h = cv2.add(h, hue_shift)
-        sat_shift = np.random.uniform(sat_shift_limit[0], sat_shift_limit[1])
-        s = cv2.add(s, sat_shift)
-        val_shift = np.random.uniform(val_shift_limit[0], val_shift_limit[1])
-        v = cv2.add(v, val_shift)
-        image = cv2.merge((h, s, v))
-        image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
-
-    return image
-
-
-def randomShiftScaleRotate(image, mask,
-                           shift_limit=(-0.05, 0.05),#shift_limit=(-0.0625, 0.0625),
-                           scale_limit=(-0.05, 0.05),#2scale_limit=(-0.1, 0.1),
-                           rotate_limit=(-2, 2),#rotate_limit=(-45, 45), 
-                           aspect_limit=(0, 0),
-                           borderMode=cv2.BORDER_CONSTANT, u=0.5):
-    if np.random.random() < u:
-        height, width, channel = image.shape
-
-        angle = np.random.uniform(rotate_limit[0], rotate_limit[1])  # degree
-        scale = np.random.uniform(1 + scale_limit[0], 1 + scale_limit[1])
-        aspect = np.random.uniform(1 + aspect_limit[0], 1 + aspect_limit[1])
-        sx = scale * aspect / (aspect ** 0.5)
-        sy = scale / (aspect ** 0.5)
-        dx = round(np.random.uniform(shift_limit[0], shift_limit[1]) * width)
-        dy = round(np.random.uniform(shift_limit[0], shift_limit[1]) * height)
-
-        cc = np.math.cos(angle / 180 * np.math.pi) * sx
-        ss = np.math.sin(angle / 180 * np.math.pi) * sy
-        rotate_matrix = np.array([[cc, -ss], [ss, cc]])
-
-        box0 = np.array([[0, 0], [width, 0], [width, height], [0, height], ])
-        box1 = box0 - np.array([width / 2, height / 2])
-        box1 = np.dot(box1, rotate_matrix.T) + np.array([width / 2 + dx, height / 2 + dy])
-
-        box0 = box0.astype(np.float32)
-        box1 = box1.astype(np.float32)
-        mat = cv2.getPerspectiveTransform(box0, box1)
-        image = cv2.warpPerspective(image, mat, (width, height), flags=cv2.INTER_LINEAR, borderMode=borderMode,
-                                    borderValue=(
-                                        0, 0,
-                                        0,))
-        mask = cv2.warpPerspective(mask, mat, (width, height), flags=cv2.INTER_LINEAR, borderMode=borderMode,
-                                   borderValue=(
-                                       0, 0,
-                                       0,))
-
-    return image, mask
-
 
 def randomHorizontalFlip(image, mask, u=0.5):
     if np.random.random() < u:
@@ -108,11 +49,6 @@ def train_generator():
                 img = cv2.resize(img, (input_width, input_height))
                 mask = cv2.imread('../input/train_masks/{}_mask.png'.format(id), cv2.IMREAD_GRAYSCALE)
                 mask = cv2.resize(mask, (input_width, input_height))
-                img = randomHueSaturationValue(img,
-                                               hue_shift_limit=(-5, 5),
-                                               sat_shift_limit=(-2, 2),
-                                               val_shift_limit=(-5, 5))
-                img, mask = randomShiftScaleRotate(img, mask)
                 img, mask = randomHorizontalFlip(img, mask)
                 mask = np.expand_dims(mask, axis=2)
                 x_batch.append(img)
@@ -154,7 +90,7 @@ callbacks = [EarlyStopping(monitor='val_dice_coeff',
                                epsilon=1e-5,
                                mode='max'),
              ModelCheckpoint(monitor='val_dice_coeff',
-                             filepath='weights/u_Norm_incep_eco_512_alternate_RMS'+str(input_width)+'_val20_b'+str(batch_size)+'_re1.hdf5', 
+                             filepath='weights/unet_renorm_incep_eco_alternate_adam'+str(input_width)+'_val20_b'+str(batch_size)+'.hdf5', 
                              save_best_only=True,
                              save_weights_only=True,
                              verbose = 1,

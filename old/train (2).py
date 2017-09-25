@@ -18,7 +18,7 @@ model = params.model
 test_size =  params.test_size
 
 
-#model.load_weights(filepath='weights/u_Norm_incep_eco_512_alternate_RMS512_val20_b4.hdf5')
+model.load_weights(filepath='weights/unet_renorm_incep_eco_alternate_adam_RMS_1280_val20_b2.hdf5')
 
 
 df_train = pd.read_csv('../input/train_masks.csv')
@@ -154,7 +154,7 @@ callbacks = [EarlyStopping(monitor='val_dice_coeff',
                                epsilon=1e-5,
                                mode='max'),
              ModelCheckpoint(monitor='val_dice_coeff',
-                             filepath='weights/u_Norm_incep_eco_512_alternate_RMS'+str(input_width)+'_val20_b'+str(batch_size)+'_re1.hdf5', 
+                             filepath='weights/unet_renorm_incep_eco_alternate_adam'+str(input_width)+'_val20_b'+str(batch_size)+'.hdf5', 
                              save_best_only=True,
                              save_weights_only=True,
                              verbose = 1,
